@@ -1,0 +1,64 @@
+package com.plcoding.weatherapp.data.mappers
+
+import com.plcoding.weatherapp.data.remote.WeatherDataDto
+import com.plcoding.weatherapp.data.remote.WeatherDto
+import com.plcoding.weatherapp.domain.weather.WeatherData
+import com.plcoding.weatherapp.domain.weather.WeatherInfo
+import com.plcoding.weatherapp.domain.weather.WeatherType
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.temporal.TemporalAdjuster
+import java.time.temporal.TemporalAdjusters
+
+data class IndexedWeatherData(
+    val index: Int,
+    val data: WeatherData,
+)
+
+
+fun WeatherDataDto.toWeatherDataMap(): Map<Int, List<WeatherData>> {
+    return time.mapIndexed { index, time ->
+        val temperature = temperatures[index]
+        val weatherCode = weatherCodes[index]
+        val windSpeed = windSpeeds[index]
+        val pressure = pressures[index]
+        val humidity = humidities[index]
+        IndexedWeatherData(
+            index = index,
+            data = WeatherData(
+                time = LocalDateTime.parse(time, DateTimeFormatter.ISO_DATE_TIME),
+                temperatureCelsius = temperature,
+                pressure = pressure,
+                windSpeed = windSpeed,
+                humidity = humidity,
+                weatherType = WeatherType.fromWMO(weatherCode)
+            )
+        )
+    }.groupBy {
+        it.index/24
+    }.mapValues {
+        it.value.map { it.data }
+    }
+}
+
+fun WeatherDto.toWeatherInfo(): WeatherInfo {
+    val weatherDataMap = weatherData.toWeatherDataMap()
+    val now = LocalDateTime.now()
+    val currentWeatherData = weatherDataMap[0]?.find {
+        val hour =
+            if(now.hour <= 23 && now.minute < 30) {
+                now.hour
+            } else if( now.hour < 23 && now.minute > 30) {
+                now.hour + 1
+            } else {
+                now.plusDays(1).hour + 1
+            }
+        it.time.hour == hour
+    }
+    return WeatherInfo(
+        weatherdataPerDay = weatherDataMap,
+        currentWeatherData = currentWeatherData
+    )
+}
