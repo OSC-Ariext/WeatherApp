@@ -5,12 +5,8 @@ import com.plcoding.weatherapp.data.remote.WeatherDto
 import com.plcoding.weatherapp.domain.weather.WeatherData
 import com.plcoding.weatherapp.domain.weather.WeatherInfo
 import com.plcoding.weatherapp.domain.weather.WeatherType
-import java.time.DayOfWeek
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.time.temporal.TemporalAdjuster
-import java.time.temporal.TemporalAdjusters
 
 data class IndexedWeatherData(
     val index: Int,
@@ -58,7 +54,7 @@ fun WeatherDto.toWeatherInfo(): WeatherInfo {
         it.time.hour == hour
     }
     return WeatherInfo(
-        weatherdataPerDay = weatherDataMap,
+        weatherDataPerDay = weatherDataMap,
         currentWeatherData = currentWeatherData
     )
 }
