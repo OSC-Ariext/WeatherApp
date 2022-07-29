@@ -5,10 +5,12 @@ import com.plcoding.weatherapp.data.remote.WeatherApi
 import com.plcoding.weatherapp.domain.repository.WeatherRepository
 import com.plcoding.weatherapp.domain.util.Resource
 import com.plcoding.weatherapp.domain.weather.WeatherInfo
+import javax.inject.Inject
 
-class WeatherRepositoryImpl(
+class WeatherRepositoryImpl @Inject constructor(
     private val api: WeatherApi
 ): WeatherRepository {
+
     override suspend fun getWeatherData(lat: Double, long: Double): Resource<WeatherInfo> {
         return try {
             Resource.Success(
@@ -17,9 +19,9 @@ class WeatherRepositoryImpl(
                     long = long
                 ).toWeatherInfo()
             )
-        } catch (e: Exception) {
+        } catch(e: Exception) {
             e.printStackTrace()
-            Resource.Error(e.message ?: "An unkown error occurred.")
+            Resource.Error(e.message ?: "An unknown error occurred.")
         }
     }
 }
